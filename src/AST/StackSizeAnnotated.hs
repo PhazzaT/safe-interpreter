@@ -76,7 +76,6 @@ data GenericSEPair se1 se2 where
 
 equalizeStacks :: (StackExtendable se1, StackExtendable se2)
                => se1 ss1 -> se2 ss2 -> GenericSEPair se1 se2
-            --    => se1 ss1 -> se2 ss2 -> (se1 (Max ss1 ss2), se2 (Max ss1 ss2))
 equalizeStacks se1 se2 =
     case compareSNats (getStackSize se1) (getStackSize se2) of
         CompEQ -> GenericSEPair se1 se2

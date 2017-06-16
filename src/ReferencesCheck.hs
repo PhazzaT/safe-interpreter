@@ -39,11 +39,14 @@ rcCommand :: B.Command -> MG S.Command
 rcCommand B.CSkip = return $ G $ S.CSkip SZ
 rcCommand (B.CAssign lv rv) = mapG2 S.CAssign <$> rcLValue lv <*> rcRValue rv
 rcCommand (B.CDeclare vr@(B.VR name) rv) = do
+    -- Order is important here - or we could be able to
+    -- access the variable before it is assigned
+    rv' <- rcRValue rv
     RCState vars (G mx) <- get
     case M.lookup name vars of
         Nothing -> do
             put $ RCState (M.insert name (G mx) vars) (G $ SS mx)
-            mapG2 S.CDeclare <$> rcVarRef vr <*> rcRValue rv
+            mapG2 S.CDeclare <$> rcVarRef vr <*> pure rv'
         Just _ -> throwError $
             "Variable redeclared in the same scope: " ++ name
 

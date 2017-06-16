@@ -3,8 +3,8 @@
 module Lexer where
 
 import Control.Lens
+import Data.Char
 import Text.Parsec hiding (token)
-import Text.Parsec.String
 
 type PMonad = Parsec String ()
 
@@ -14,18 +14,29 @@ data TokenData
     = TDIntegerLiteral Integer
     | TDName String
     | TDSemicolon
-    | TDColon
     | TDEquals
     | TDPlus
-    | TDSquareOpen
-    | TDSquareClose
+    | TDOpenParen
+    | TDCloseParen
     | TDVar
     deriving (Eq, Ord, Show)
 
 makePrisms ''TokenData
 
 lexer :: String -> Either ParseError [Token]
-lexer = runP (token `sepBy` spaces) () "<stdin>"
+lexer = runP (token `sepBy` spaces) () "<stdin>" . trim
+
+trim :: String -> String
+trim = trimSuffix . trimPrefix
+
+trimPrefix :: String -> String
+trimPrefix (c:cs)
+    | isSpace c = trimPrefix cs
+    | otherwise = c:cs
+trimPrefix [] = []
+
+trimSuffix :: String -> String
+trimSuffix = reverse . trimPrefix . reverse
 
 token :: PMonad Token
 token =
@@ -33,11 +44,10 @@ token =
         [ TDIntegerLiteral <$> intLiteral
         , stringyThing
         , char ';' >> return TDSemicolon
-        , char ':' >> return TDColon
         , char '=' >> return TDEquals
         , char '+' >> return TDPlus
-        , char '[' >> return TDSquareOpen
-        , char ']' >> return TDSquareClose
+        , char '(' >> return TDOpenParen
+        , char ')' >> return TDCloseParen
         ]
 
 intLiteral :: PMonad Integer

@@ -2,9 +2,8 @@
 
 module TH where
 
-import Control.Monad
 import Language.Haskell.TH
-import System.IO
+
 
 makeStackExtendableInstance :: Name -> Q [Dec]
 makeStackExtendableInstance name = do
@@ -20,7 +19,7 @@ makeStackExtendableInstance name = do
                         (NormalB (VarE ssName))
                         []
                 esoFirstVar = AppE (ConE bigSSName) (VarE ssName)
-                esoConvert x (_, AppT t _) =
+                esoConvert x (_, AppT _ _) =
                     AppE (VarE extendStackOnceName) (VarE x)
                 esoConvert x _ = VarE x
                 esoOtherVars = zipWith esoConvert esoOtherParams bts

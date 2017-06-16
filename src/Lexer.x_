@@ -1,0 +1,34 @@
+{
+module Lexer where
+}
+
+%wrapper "basic"
+
+$digit      = 0-9
+$lower      = [a-z]
+$upper      = [A-Z]
+$letter     = [a-zA-Z]
+$identChar  = [a-zA-Z0-9_]
+
+tokens :-
+    var                 { const TokVar }
+    ";"                 { const TokSemicolon }
+    "="                 { const TokEquals }
+    "+"                 { const TokPlus }
+    "("                 { const TokOpenParen }
+    ")"                 { const TokCloseParen }
+    $letter $identChar+ { TokName }
+    $digit+             { TokIntegerLiteral . read }
+    $white+             ;
+{
+data Token
+    = TokIntegerLiteral Integer
+    | TokName String
+    | TokSemicolon
+    | TokEquals
+    | TokPlus
+    | TokVar
+    | TokOpenParen
+    | TokCloseParen
+    deriving (Eq, Ord, Show)
+}

@@ -1,12 +1,23 @@
 module Main where
 
-import AST.Basic
-import AST.StackSizeAnnotated
 import Execute
 import Lexer
 import Parser
 import ReferencesCheck
-import TH
+import TypeMagic
+
+import System.Exit
+
 
 main :: IO ()
-main = return ()
+main = do
+    input <- getContents
+    toks <- errorIO $ lexer input
+    ast1 <- errorIO $ parse toks
+    G ast2 <- errorIO $ refCheck ast1
+    let vec = execute ast2
+    print $ vecToList vec
+
+errorIO :: (Show e) => Either e a -> IO a
+errorIO (Left e) = die $ show e
+errorIO (Right a) = return a

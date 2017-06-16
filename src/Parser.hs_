@@ -16,16 +16,16 @@ parse :: [Token] -> Either ParseError Program
 parse = runParser parseProgram () "<stdin>"
 
 parseProgram :: PMonad Program
-parseProgram = undefined
+parseProgram = Program <$> many parseCommand
 
 parseCommand :: PMonad Command
 parseCommand = do
-    c <- parseCSkip <|> parseCAssign <|> parseCDeclare
+    c <- parseCAssign <|> parseCDeclare <|> parseCSkip
     expect _TDSemicolon
     return c
 
 parseCSkip :: PMonad Command
-parseCSkip = expect _TDSemicolon >> return CSkip
+parseCSkip = return CSkip
 
 parseCAssign :: PMonad Command
 parseCAssign = do

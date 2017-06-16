@@ -8,8 +8,6 @@
 module TypeMagic where
 
 import Data.Kind()
--- import Data.Proxy
--- import Data.Type.Equality
 import Data.Typeable
 
 
@@ -33,11 +31,6 @@ stToST' SZ (SS _) _ = STBase'
 stToST' (SS n) (SS m) STBase = STInduction' $ stToST' n m STBase
 stToST' (SS n) (SS (SS m)) (STInduction pf) =
     STInduction' $ stToST' n (SS m) (stTransitivity STBase pf)
-
--- stpToST :: SNat n -> SNat n -> SmallerThan' n ('S m) -> SmallerThan n ('S m)
--- stpToST SZ (SS m) STBase' = STBase
--- stpToST SZ (SS m) (STInduction' pf) = STInduction' $ stpToST SZ m pf
--- stpToST (SS n) (SS m) = 
 
 st'Transitivity :: SmallerThan' k l
                 -> SmallerThan' l m
@@ -68,17 +61,6 @@ data Compare n m where
     CompEQ :: Compare n n
     CompGT :: SmallerThan m n -> Compare n m
 
--- compareSNats :: SNat n -> SNat m -> Compare n m
--- compareSNats SZ SZ = CompEQ
--- compareSNats SZ (SS _) = CompLT STBase'
--- compareSNats (SS _) SZ = CompGT STBase'
--- compareSNats (SS n) (SS m) = case compareSNats n m of
---     CompEQ -> CompEQ
---     CompLT STBase' -> CompLT $ STInduction' STBase'
---     CompLT pf@STInduction'{} -> CompLT $ STInduction' pf
---     CompGT STBase' -> CompGT $ STInduction' STBase'
---     CompGT pf@STInduction'{} -> CompGT $ STInduction' pf
-
 compareSNats :: SNat n -> SNat m -> Compare n m
 compareSNats SZ SZ = CompEQ
 compareSNats SZ m@(SS _) = CompLT $ stGreaterThanZero m
@@ -93,6 +75,7 @@ compareSNats (SS n) (SS m) = case compareSNats n m of
 data Vector a (n :: Nat) where
     VNil  :: Vector a 'Z
     VCons :: a -> Vector a n -> Vector a ('S n)
+deriving instance Show a => Show (Vector a n)
 
 data Ordinal (n :: Nat) where
     OZ :: Ordinal ('S n)
@@ -113,3 +96,7 @@ vget (OS o) (VCons _ as) = vget o as
 vput :: Ordinal m -> a -> Vector a m -> Vector a m
 vput OZ a (VCons _ as) = VCons a as
 vput (OS o) a (VCons a' as) = VCons a' (vput o a as)
+
+vecToList :: Vector a m -> [a]
+vecToList VNil = []
+vecToList (VCons a as) = a : vecToList as
