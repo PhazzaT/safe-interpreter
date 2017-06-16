@@ -34,9 +34,6 @@ makeStackExtendableInstance name = do
         makeCase con = fail $ "Can't make a case for constructor: "
                 ++ pprint con
     info <- reify name
-    -- runIO $ do
-    --     print info
-    --     hFlush stdout
     case info of
         TyConI (DataD _ nm [_] _ cons _) -> do
             (gsss, esos) <- unzip <$> mapM makeCase cons
