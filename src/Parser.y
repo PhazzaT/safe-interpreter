@@ -19,6 +19,9 @@ import Control.Monad.Except
     ';'    { Token _ TDSemicolon }
     '='    { Token _ TDEquals }
     '+'    { Token _ TDPlus }
+    '-'    { Token _ TDMinus }
+    '*'    { Token _ TDMul }
+    '/'    { Token _ TDDiv }
     ident  { Token _ (TDName $$) }
     number { Token _ (TDIntegerLiteral $$) }
 
@@ -40,11 +43,17 @@ LValue0 :: { LValue }
 LValue0 : VarRef { LVVariable $1 }
 
 RValue0 :: { RValue }
-RValue0 : RValue1 '+' RValue0 { RVAdd $1 $3 }
+RValue0 : RValue1 '+' RValue0 { RVOp (+) $1 $3 }
+        | RValue1 '-' RValue0 { RVOp (-) $1 $3 }
         | RValue1             { $1 }
 
 RValue1 :: { RValue }
-RValue1 : LValue0         { RVFromLV $1 }
+RValue1 : RValue2 '*' RValue1 { RVOp (*) $1 $3 }
+        | RValue2 '/' RValue1 { RVOp div $1 $3 }
+        | RValue2             { $1 }
+
+RValue2 :: { RValue }
+RValue2 : LValue0         { RVFromLV $1 }
         | Literal         { RVLiteral $1 }
         | '(' RValue0 ')' { $2 }
 

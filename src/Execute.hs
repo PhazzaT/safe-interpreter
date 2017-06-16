@@ -27,7 +27,7 @@ exeCommand (CDeclare ss vr rv) = exeCommand (CAssign ss (LVVariable ss vr) rv)
 calcRValue :: RValue ss -> EMonad ss Integer
 calcRValue (RVFromLV _ lv) = gets $ vget (getLValueAddress lv)
 calcRValue (RVLiteral _ lit) = return $ calcLiteral lit
-calcRValue (RVAdd _ rv1 rv2) = (+) <$> calcRValue rv1 <*> calcRValue rv2
+calcRValue (RVOp _ op rv1 rv2) = op <$> calcRValue rv1 <*> calcRValue rv2
 
 calcLiteral :: Literal -> Integer
 calcLiteral (LInteger i) = i

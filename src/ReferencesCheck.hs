@@ -15,15 +15,15 @@ import TypeMagic
 
 
 data RCState = RCState (M.Map B.VarName (G SNat)) (G SNat)
-type M = ExceptT String (State RCState)
+type M = StateT RCState (Except String)
 type MG a = M (G a)
 data G a where G :: a (b :: Nat) -> G a
 
 emptyRCState :: RCState
 emptyRCState = RCState M.empty (G SZ)
 
-refCheck :: B.Program -> Either String (G S.Program)
-refCheck p = evalState (runExceptT $ rcProgram p) emptyRCState
+refCheck :: B.Program -> Either String (G S.Program, RCState)
+refCheck p = runExcept $ runStateT (rcProgram p) emptyRCState
 
 rcProgram :: B.Program -> MG S.Program
 rcProgram (B.Program cmds) = do
@@ -56,7 +56,8 @@ rcLValue (B.LVVariable vr) = mapG S.LVVariable <$> rcVarRef vr
 rcRValue :: B.RValue -> MG S.RValue
 rcRValue (B.RVFromLV lv) = mapG S.RVFromLV <$> rcLValue lv
 rcRValue (B.RVLiteral lit) = return $ G $ S.RVLiteral SZ $ rcLiteral lit
-rcRValue (B.RVAdd rv1 rv2) = mapG2 S.RVAdd <$> rcRValue rv1 <*> rcRValue rv2
+rcRValue (B.RVOp op rv1 rv2) =
+    mapG2 (`S.RVOp` op) <$> rcRValue rv1 <*> rcRValue rv2
 
 rcVarRef :: B.VarRef -> MG S.VarRef
 rcVarRef (B.VR name) = do
@@ -72,6 +73,10 @@ rcLiteral (B.LInteger i) = S.LInteger i
 natToSNat :: Nat -> G SNat
 natToSNat Z = G SZ
 natToSNat (S n) = case natToSNat n of G n' -> G $ SS n'
+
+snatToNat :: G SNat -> Nat
+snatToNat (G SZ) = Z
+snatToNat (G (SS n)) = S $ snatToNat (G n)
 
 mapG :: (StackExtendable se1, StackExtendable se2)
      => (forall ss. SNat ss -> se1 ss -> se2 ss) -> G se1 -> G se2

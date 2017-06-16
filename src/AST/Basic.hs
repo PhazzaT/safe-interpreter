@@ -14,10 +14,11 @@ newtype LValue
 data RValue
     = RVFromLV LValue
     | RVLiteral Literal
-    | RVAdd RValue RValue
+    | RVOp Op RValue RValue
 
 newtype VarRef = VR VarName
 newtype Literal
     = LInteger Integer
 
 type VarName = String
+type Op = Integer -> Integer -> Integer

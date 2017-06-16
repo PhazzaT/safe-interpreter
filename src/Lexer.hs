@@ -16,6 +16,9 @@ data TokenData
     | TDSemicolon
     | TDEquals
     | TDPlus
+    | TDMinus
+    | TDMul
+    | TDDiv
     | TDOpenParen
     | TDCloseParen
     | TDVar
@@ -46,6 +49,9 @@ token =
         , char ';' >> return TDSemicolon
         , char '=' >> return TDEquals
         , char '+' >> return TDPlus
+        , char '-' >> return TDMinus
+        , char '*' >> return TDMul
+        , char '/' >> return TDDiv
         , char '(' >> return TDOpenParen
         , char ')' >> return TDCloseParen
         ]

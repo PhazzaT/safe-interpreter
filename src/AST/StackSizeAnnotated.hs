@@ -36,12 +36,13 @@ data LValue (ss :: Nat) where
 data RValue (ss :: Nat) where
     RVFromLV  :: SNat ss -> LValue ss -> RValue ss
     RVLiteral :: SNat ss -> Literal -> RValue ss
-    RVAdd     :: SNat ss -> RValue ss -> RValue ss -> RValue ss
+    RVOp      :: SNat ss -> Op -> RValue ss -> RValue ss -> RValue ss
 
 data VarRef (ss :: Nat) where
     VR :: SNat ('S ss) -> SNat cell
        -> SmallerThan cell ('S ss) -> VarRef ('S ss)
 newtype Literal = LInteger Integer
+type Op = Integer -> Integer -> Integer
 
 class StackExtendable se where
     getStackSize :: se ss -> SNat ss
