@@ -7,6 +7,7 @@ data Command
     = CSkip
     | CAssign LValue RValue
     | CDeclare VarRef RValue
+    | CScope [Command]
 
 newtype LValue
     = LVVariable VarRef

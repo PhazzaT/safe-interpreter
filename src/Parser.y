@@ -14,14 +14,16 @@ import Control.Monad.Except
 
 %token
     var    { Token _ TDVar }
-    '('    { Token _ TDOpenParen }
-    ')'    { Token _ TDCloseParen }
     ';'    { Token _ TDSemicolon }
     '='    { Token _ TDEquals }
     '+'    { Token _ TDPlus }
     '-'    { Token _ TDMinus }
     '*'    { Token _ TDMul }
     '/'    { Token _ TDDiv }
+    '('    { Token _ TDOpenParen }
+    ')'    { Token _ TDCloseParen }
+    '{'    { Token _ TDOpenCurly }
+    '}'    { Token _ TDCloseCurly }
     ident  { Token _ (TDName $$) }
     number { Token _ (TDIntegerLiteral $$) }
 
@@ -37,6 +39,7 @@ CommandList : Command ';' CommandList { $1 : $3 }
 Command :: { Command }
 Command : var VarRef '=' RValue0 { CDeclare $2 $4 }
         | LValue0 '=' RValue0    { CAssign $1 $3 }
+        | '{' CommandList '}'    { CScope $2 }
         |                        { CSkip }
 
 LValue0 :: { LValue }

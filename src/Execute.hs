@@ -14,7 +14,10 @@ type EMonad ss = State (EState ss)
 
 execute :: Program ss -> Vector Integer ss
 execute (Program ss cmds) =
-    execState (mapM exeCommand $ sslistToList cmds) (vreplicate ss 0)
+    execState (exeCmds cmds) (vreplicate ss 0)
+
+exeCmds :: SSList Command ss -> EMonad ss ()
+exeCmds cmds = mapM_ exeCommand $ sslistToList cmds
 
 exeCommand :: Command ss -> EMonad ss ()
 exeCommand (CSkip _) = return ()
@@ -23,6 +26,7 @@ exeCommand (CAssign _ lv rv) = do
     val <- calcRValue rv
     modify $ vput addr val
 exeCommand (CDeclare ss vr rv) = exeCommand (CAssign ss (LVVariable ss vr) rv)
+exeCommand (CScope _ cmds) = exeCmds cmds
 
 calcRValue :: RValue ss -> EMonad ss Integer
 calcRValue (RVFromLV _ lv) = gets $ vget (getLValueAddress lv)

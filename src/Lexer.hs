@@ -21,6 +21,8 @@ data TokenData
     | TDDiv
     | TDOpenParen
     | TDCloseParen
+    | TDOpenCurly
+    | TDCloseCurly
     | TDVar
     deriving (Eq, Ord, Show)
 
@@ -54,6 +56,8 @@ token =
         , char '/' >> return TDDiv
         , char '(' >> return TDOpenParen
         , char ')' >> return TDCloseParen
+        , char '{' >> return TDOpenCurly
+        , char '}' >> return TDCloseCurly
         ]
 
 intLiteral :: PMonad Integer

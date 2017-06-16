@@ -1,3 +1,10 @@
-var x = (4 + 4);
-var y = (x + x);
-var sakdf = 1 + x * 7;
+var x = 1;
+var sakdf = 0;
+{
+	var y = x + x;
+	sakdf = y + 1;
+};
+{
+	var z = 2 * sakdf;
+	sakdf = 1 + z;
+};

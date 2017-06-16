@@ -49,6 +49,12 @@ rcCommand (B.CDeclare vr@(B.VR name) rv) = do
             mapG2 S.CDeclare <$> rcVarRef vr <*> pure rv'
         Just _ -> throwError $
             "Variable redeclared in the same scope: " ++ name
+rcCommand (B.CScope cmds) = do
+    -- Preserve current scope
+    s <- get
+    ret <- mapG S.CScope <$> rcCmds cmds
+    put s
+    return ret
 
 rcLValue :: B.LValue -> MG S.LValue
 rcLValue (B.LVVariable vr) = mapG S.LVVariable <$> rcVarRef vr

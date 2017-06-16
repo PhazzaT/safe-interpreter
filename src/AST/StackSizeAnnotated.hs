@@ -29,6 +29,7 @@ data Command (ss :: Nat) where
     CSkip    :: SNat ss -> Command ss
     CAssign  :: SNat ss -> LValue ss -> RValue ss -> Command ss
     CDeclare :: SNat ss -> VarRef ss -> RValue ss -> Command ss
+    CScope   :: SNat ss -> SSList Command ss -> Command ss
 
 data LValue (ss :: Nat) where
     LVVariable :: SNat ss -> VarRef ss -> LValue ss
