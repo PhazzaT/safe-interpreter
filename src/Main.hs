@@ -1,5 +1,6 @@
 module Main where
 
+import AST.StackSizeAnnotated
 import Execute
 import Lexer
 import Parser
@@ -16,7 +17,13 @@ main = do
     input <- getContents
     toks <- errorIO $ lexer input
     ast1 <- errorIO $ parse toks
-    (G ast2, RCState vars _) <- errorIO $ refCheck ast1
+    (G ast2, RCState vars visSize) <- errorIO $ refCheck ast1
+
+    let showGSNat n = show $ natToInteger $ snatToNat n
+    let Program ss _ = ast2
+    putStrLn $ "Global variables: " ++ showGSNat visSize
+    putStrLn $ "Inferred stack size: " ++ showGSNat (G ss)
+
     let vec = execute ast2
     let assocs = associateVars vars $ vecToList vec
     putStrLn $ intercalate ", " $ map (\(v, i) -> v ++ " = " ++ show i) assocs

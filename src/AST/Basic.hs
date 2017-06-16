@@ -8,6 +8,8 @@ data Command
     | CAssign LValue RValue
     | CDeclare VarRef RValue
     | CScope [Command]
+    | CIf RValue Command Command
+    | CWhile RValue Command
 
 newtype LValue
     = LVVariable VarRef

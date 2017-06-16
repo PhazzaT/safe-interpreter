@@ -14,6 +14,9 @@ import Control.Monad.Except
 
 %token
     var    { Token _ TDVar }
+    if     { Token _ TDIf }
+    else   { Token _ TDElse }
+    while  { Token _ TDWhile }
     ';'    { Token _ TDSemicolon }
     '='    { Token _ TDEquals }
     '+'    { Token _ TDPlus }
@@ -37,10 +40,12 @@ CommandList : Command ';' CommandList { $1 : $3 }
             |                         { [] }
 
 Command :: { Command }
-Command : var VarRef '=' RValue0 { CDeclare $2 $4 }
-        | LValue0 '=' RValue0    { CAssign $1 $3 }
-        | '{' CommandList '}'    { CScope $2 }
-        |                        { CSkip }
+Command : var VarRef '=' RValue0                  { CDeclare $2 $4 }
+        | LValue0 '=' RValue0                     { CAssign $1 $3 }
+        | '{' CommandList '}'                     { CScope $2 }
+        | if '(' RValue0 ')' Command else Command { CIf $3 $5 $7 }
+        | while '(' RValue0 ')' Command           { CWhile $3 $5 }
+        |                                         { CSkip }
 
 LValue0 :: { LValue }
 LValue0 : VarRef { LVVariable $1 }

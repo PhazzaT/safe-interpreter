@@ -30,6 +30,8 @@ data Command (ss :: Nat) where
     CAssign  :: SNat ss -> LValue ss -> RValue ss -> Command ss
     CDeclare :: SNat ss -> VarRef ss -> RValue ss -> Command ss
     CScope   :: SNat ss -> SSList Command ss -> Command ss
+    CIf      :: SNat ss -> RValue ss -> Command ss -> Command ss -> Command ss
+    CWhile   :: SNat ss -> RValue ss -> Command ss -> Command ss
 
 data LValue (ss :: Nat) where
     LVVariable :: SNat ss -> VarRef ss -> LValue ss
@@ -44,6 +46,9 @@ data VarRef (ss :: Nat) where
        -> SmallerThan cell ('S ss) -> VarRef ('S ss)
 newtype Literal = LInteger Integer
 type Op = Integer -> Integer -> Integer
+
+data SEPair se1 se2 (ss :: Nat) where
+    SEPair :: SNat ss -> se1 ss -> se2 ss -> SEPair se1 se2 ss
 
 class StackExtendable se where
     getStackSize :: se ss -> SNat ss
@@ -60,6 +65,11 @@ makeStackExtendableInstance ''Program
 makeStackExtendableInstance ''Command
 makeStackExtendableInstance ''LValue
 makeStackExtendableInstance ''RValue
+
+instance (StackExtendable se1, StackExtendable se2) => StackExtendable (SEPair se1 se2) where
+    getStackSize (SEPair ss _ _) = ss
+    extendStackOnce (SEPair ss se1 se2)
+        = SEPair (SS ss) (extendStackOnce se1) (extendStackOnce se2)
 
 instance StackExtendable VarRef where
     getStackSize (VR ss _ _) = ss

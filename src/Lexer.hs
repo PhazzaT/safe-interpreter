@@ -24,6 +24,9 @@ data TokenData
     | TDOpenCurly
     | TDCloseCurly
     | TDVar
+    | TDIf
+    | TDElse
+    | TDWhile
     deriving (Eq, Ord, Show)
 
 makePrisms ''TokenData
@@ -68,4 +71,7 @@ stringyThing = do
     str <- (:) <$> letter <*> many alphaNum
     case str of
         "var" -> return TDVar
+        "if" -> return TDIf
+        "else" -> return TDElse
+        "while" -> return TDWhile
         _ -> return $ TDName str

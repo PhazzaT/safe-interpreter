@@ -27,6 +27,16 @@ exeCommand (CAssign _ lv rv) = do
     modify $ vput addr val
 exeCommand (CDeclare ss vr rv) = exeCommand (CAssign ss (LVVariable ss vr) rv)
 exeCommand (CScope _ cmds) = exeCmds cmds
+exeCommand (CIf _ rv c1 c2) = do
+    val <- calcRValue rv
+    if val > 0
+        then exeCommand c1
+        else exeCommand c2
+exeCommand c@(CWhile _ rv c') = do
+    val <- calcRValue rv
+    when (val > 0) $ do
+        exeCommand c'
+        exeCommand c
 
 calcRValue :: RValue ss -> EMonad ss Integer
 calcRValue (RVFromLV _ lv) = gets $ vget (getLValueAddress lv)

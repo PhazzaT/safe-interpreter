@@ -49,12 +49,18 @@ rcCommand (B.CDeclare vr@(B.VR name) rv) = do
             mapG2 S.CDeclare <$> rcVarRef vr <*> pure rv'
         Just _ -> throwError $
             "Variable redeclared in the same scope: " ++ name
-rcCommand (B.CScope cmds) = do
-    -- Preserve current scope
-    s <- get
-    ret <- mapG S.CScope <$> rcCmds cmds
-    put s
-    return ret
+rcCommand (B.CScope cmds) = preserveScope $ mapG S.CScope <$> rcCmds cmds
+rcCommand (B.CIf rv c1 c2) = do
+    G rv' <- rcRValue rv
+    G c1' <- preserveScope $ rcCommand c1
+    G c2' <- preserveScope $ rcCommand c2
+    case equalizeStacks c1' c2' of
+        GenericSEPair c1'' c2'' ->
+            case equalizeStacks rv' (SEPair (getStackSize c1'') c1'' c2'') of
+                GenericSEPair rv'' (SEPair ss cc1 cc2) ->
+                    return $ G $ S.CIf ss rv'' cc1 cc2
+rcCommand (B.CWhile rc c) =
+    mapG2 S.CWhile <$> rcRValue rc <*> preserveScope (rcCommand c)
 
 rcLValue :: B.LValue -> MG S.LValue
 rcLValue (B.LVVariable vr) = mapG S.LVVariable <$> rcVarRef vr
@@ -75,6 +81,13 @@ rcVarRef (B.VR name) = do
 
 rcLiteral :: B.Literal -> S.Literal
 rcLiteral (B.LInteger i) = S.LInteger i
+
+preserveScope :: M a -> M a
+preserveScope m = do
+    s <- get
+    r <- m
+    put s
+    return r
 
 natToSNat :: Nat -> G SNat
 natToSNat Z = G SZ

@@ -18,6 +18,12 @@ data SNat n where
     SS :: SNat n -> SNat ('S n)
 deriving instance Typeable (SNat n)
 
+natToInteger :: Nat -> Integer
+natToInteger = work 0
+    where
+        work a Z     = a
+        work a (S n) = work (a + 1) n
+
 data SmallerThan n m where
     STBase      :: SmallerThan n ('S n)
     STInduction :: SmallerThan n ('S m) -> SmallerThan n ('S ('S m))

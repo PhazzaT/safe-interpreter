@@ -1,10 +1,13 @@
-var x = 1;
-var sakdf = 0;
-{
-	var y = x + x;
-	sakdf = y + 1;
+var counter = 10;
+var result = 1;
+while (counter) {
+	var foo = 0;
+	counter = counter - 1;
+	result = result * 2;
 };
-{
-	var z = 2 * sakdf;
-	sakdf = 1 + z;
-};
+
+var foo = 7;
+if (0 + 1) {
+	foo = 42;
+}
+else {};
